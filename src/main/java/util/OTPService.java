@@ -43,6 +43,8 @@ public class OTPService {
         System.out.println("[OTP INIT] EMAIL_PORT = " + EMAIL_PORT);
     }
 
+    
+    
     public static String generarOTP(int idUsuario) {
         String codigo = String.format("%06d", new Random().nextInt(999999));
         LocalDateTime ahora = LocalDateTime.now();
@@ -58,6 +60,8 @@ public class OTPService {
         return codigo;
     }
 
+    
+    
     public static boolean esValido(int idUsuario, String codigo) {
         OtpToken token = tokenDAO.obtenerTokenNoUsado(idUsuario, codigo);
         if (token != null) {
@@ -76,6 +80,8 @@ public class OTPService {
             return;
         }
 
+        
+        
         
         try {
             String json = "{"
@@ -111,6 +117,8 @@ public class OTPService {
         }
     }
 
+    
+    
     private static boolean validarCredenciales() {
         if (EMAIL_USER == null || EMAIL_PASS == null || EMAIL_HOST == null) {
             System.err.println("[OTP] Credenciales no disponibles. No se enviará correo.");
