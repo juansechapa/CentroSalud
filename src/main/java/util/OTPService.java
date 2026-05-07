@@ -7,8 +7,6 @@ import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.Properties;
 import java.util.Random;
@@ -18,26 +16,35 @@ public class OTPService {
     private static final int EXPIRACION_MINUTOS = 5;
     private static OTPTokenDAO tokenDAO = new OTPTokenImpl();
 
-    private static String EMAIL_USER;
-    private static String EMAIL_PASS;
+    private static final String EMAIL_USER;
+    private static final String EMAIL_PASS;
+    private static final String EMAIL_HOST;
+    private static final String EMAIL_PORT;
 
-    // 🔹 CARGA DE CREDENCIALES
     static {
+        // Leer variables de entorno (obligatorias)
         EMAIL_USER = System.getenv("EMAIL_USER");
         EMAIL_PASS = System.getenv("EMAIL_PASS");
+        EMAIL_HOST = System.getenv("EMAIL_HOST");
+        EMAIL_PORT = System.getenv("EMAIL_PORT") != null ? System.getenv("EMAIL_PORT") : "587";
 
-        if (EMAIL_USER == null || EMAIL_PASS == null) {
-            throw new RuntimeException("EMAIL ENV NO CONFIGURADO EN RENDER");
+        if (EMAIL_USER == null || EMAIL_USER.isBlank()
+                || EMAIL_PASS == null || EMAIL_PASS.isBlank()
+                || EMAIL_HOST == null || EMAIL_HOST.isBlank()) {
+            throw new RuntimeException(
+                    "ERROR: Faltan variables de entorno para el envío de correos.\n"
+                    + "Debes definir: EMAIL_USER, EMAIL_PASS, EMAIL_HOST"
+            );
         }
 
+        System.out.println("[OTP INIT] ✅ Credenciales cargadas");
         System.out.println("[OTP INIT] EMAIL_USER = " + EMAIL_USER);
-        System.out.println("[OTP INIT] EMAIL_PASS = OK");
+        System.out.println("[OTP INIT] EMAIL_HOST = " + EMAIL_HOST);
+        System.out.println("[OTP INIT] EMAIL_PORT = " + EMAIL_PORT);
     }
 
-    // 🔹 GENERAR OTP
     public static String generarOTP(int idUsuario) {
         String codigo = String.format("%06d", new Random().nextInt(999999));
-
         LocalDateTime ahora = LocalDateTime.now();
 
         OtpToken token = new OtpToken();
@@ -48,14 +55,11 @@ public class OTPService {
         token.setUsado(false);
 
         tokenDAO.insertar(token);
-
         return codigo;
     }
 
-    // 🔹 VALIDAR OTP
     public static boolean esValido(int idUsuario, String codigo) {
         OtpToken token = tokenDAO.obtenerTokenNoUsado(idUsuario, codigo);
-
         if (token != null) {
             tokenDAO.marcarComoUsado(token.getId());
             return true;
@@ -63,25 +67,20 @@ public class OTPService {
         return false;
     }
 
-    // 🔹 ENVIAR OTP
-    public static void enviarOTP(String email, String codigo) throws UnsupportedEncodingException {
-
-        if (EMAIL_USER == null || EMAIL_PASS == null
-                || EMAIL_USER.isEmpty() || EMAIL_PASS.isEmpty()) {
-
-            System.out.println("[OTP] No hay credenciales, no se envía correo.");
+    public static void enviarOTP(String destinatario, String codigo) {
+        if (!validarCredenciales()) {
             return;
         }
 
         try {
             Properties props = new Properties();
-
             props.put("mail.smtp.auth", "true");
             props.put("mail.smtp.starttls.enable", "true");
-            props.put("mail.smtp.host", "smtp.gmail.com");
-            props.put("mail.smtp.port", "587");
-
-            // 🔴 DEBUG IMPORTANTE
+            props.put("mail.smtp.host", EMAIL_HOST);
+            props.put("mail.smtp.port", EMAIL_PORT);
+            props.put("mail.smtp.connectiontimeout", "10000");
+            props.put("mail.smtp.timeout", "10000");
+            props.put("mail.smtp.writetimeout", "10000");
             props.put("mail.debug", "true");
 
             Session session = Session.getInstance(props, new Authenticator() {
@@ -93,30 +92,38 @@ public class OTPService {
 
             MimeMessage message = new MimeMessage(session);
             message.setFrom(new InternetAddress(EMAIL_USER, "Sistema SaludBoyaca"));
-            message.setRecipient(Message.RecipientType.TO, new InternetAddress(email));
+            message.setRecipient(Message.RecipientType.TO, new InternetAddress(destinatario));
             message.setSubject("Código de verificación - SaludBoyaca");
 
-            String html = "<div style='font-family:Arial;padding:20px'>"
-                    + "<h2>Verificación SaludBoyaca</h2>"
-                    + "<p>Tu código es:</p>"
-                    + "<h1 style='letter-spacing:5px'>" + codigo + "</h1>"
-                    + "<p>Expira en 5 minutos</p>"
+            String html = "<div style='font-family:Arial;padding:20px;border:1px solid #ddd'>"
+                    + "<h2 style='color:#1A5276'>Verificación SaludBoyaca</h2>"
+                    + "<p>Tu código de acceso es:</p>"
+                    + "<h1 style='letter-spacing:5px;background:#f4f4f4;padding:10px'>" + codigo + "</h1>"
+                    + "<p>Válido por 5 minutos.</p>"
+                    + "<hr><small>SaludBoyaca - Centro de Salud</small>"
                     + "</div>";
-
             message.setContent(html, "text/html; charset=utf-8");
 
-            System.out.println("[OTP] Enviando correo a: " + email);
+            System.out.println("[OTP] Enviando a: " + destinatario);
+            System.out.println("[OTP] Usando SMTP: " + EMAIL_HOST + ":" + EMAIL_PORT);
 
-            Transport transport = session.getTransport("smtp");
-            transport.connect("smtp.gmail.com", EMAIL_USER, EMAIL_PASS);
-            transport.sendMessage(message, message.getAllRecipients());
-            transport.close();
+            Transport.send(message); // forma más simple y robusta
 
-            System.out.println("[OTP] Correo enviado correctamente.");
-
+            System.out.println("[OTP] ✅ Correo enviado exitosamente");
         } catch (MessagingException e) {
-            System.err.println("[OTP] Error SMTP:");
+            System.err.println("[OTP] ❌ Error SMTP:");
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("[OTP] ❌ Error inesperado:");
             e.printStackTrace();
         }
+    }
+
+    private static boolean validarCredenciales() {
+        if (EMAIL_USER == null || EMAIL_PASS == null || EMAIL_HOST == null) {
+            System.err.println("[OTP] Credenciales no disponibles. No se enviará correo.");
+            return false;
+        }
+        return true;
     }
 }
