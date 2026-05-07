@@ -7,35 +7,37 @@ import java.sql.SQLException;
 public class Conexion {
 
     // Valores por defecto para desarrollo local (sin Docker)
-    private static final String DEFAULT_HOST = "mysql.railway.internal";
-    private static final String DEFAULT_PORT = "3306";
-    private static final String DEFAULT_DB = "railway";
-    private static final String DEFAULT_USER = "root";
-    private static final String DEFAULT_PASS = "dUJZmnUiztiSgBRCoWrdbcQLcDxNoaQV";
+    private static final String DEFAULT_HOST = null;
+    private static final String DEFAULT_DB = null;
+    private static final String DEFAULT_USER = null;
+    private static final String DEFAULT_PASS = null;
 
-    private static String getEnv(String key, String defaultValue) {
+    private static String requireEnv(String key) {
         String value = System.getenv(key);
-        return (value != null && !value.isEmpty()) ? value : defaultValue;
+        if (value == null || value.isEmpty()) {
+            throw new RuntimeException("Falta variable de entorno: " + key);
+        }
+        return value;
     }
 
     private static String getHost() {
-        return getEnv("DB_HOST", DEFAULT_HOST);
+        return requireEnv("DB_HOST");
     }
 
     private static String getPort() {
-        return getEnv("DB_PORT", DEFAULT_PORT);
+        return requireEnv("DB_PORT");
     }
 
     private static String getDbName() {
-        return getEnv("DB_NAME", DEFAULT_DB);
+        return requireEnv("DB_NAME");
     }
 
     private static String getUser() {
-        return getEnv("DB_USER", DEFAULT_USER);
+        return requireEnv("DB_USER");
     }
 
     private static String getPassword() {
-        return getEnv("DB_PASSWORD", DEFAULT_PASS);
+        return requireEnv("DB_PASSWORD");
     }
 
     public static Connection getConnection() throws SQLException {
