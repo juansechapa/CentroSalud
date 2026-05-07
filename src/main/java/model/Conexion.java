@@ -41,8 +41,13 @@ public class Conexion {
     }
 
     public static Connection getConnection() throws SQLException {
-        String url = "jdbc:mysql://" + getHost() + ":" + getPort() + "/" + getDbName()
-                + "?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
+        String url
+                = "jdbc:mysql://" + getHost() + ":" + getPort() + "/" + getDbName()
+                + "?useSSL=false"
+                + "&allowPublicKeyRetrieval=true"
+                + "&serverTimezone=UTC"
+                + "&connectTimeout=5000"
+                + "&socketTimeout=5000";
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException e) {
