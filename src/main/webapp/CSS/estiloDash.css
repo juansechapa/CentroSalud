@@ -1,0 +1,97 @@
+/* ========== ESTILOS EXCLUSIVOS PARA DASHBOARD ========== */
+:root {
+    --azul-salud: #1A5276;
+    --verde-sena: #39A900;
+    --celeste-suave: #2E86C1;
+    --gris-hielo: #F4F8FC;
+    --blanco-puro: #FFFFFF;
+    --azul-oscuro: #154360;
+    --gris-oscuro: #2C3E50;
+    --gris-medio: #7F8C8D;
+    --amarillo-ambar: #F39C12;
+    --verde-salud: #27AE60;
+    --azul-info: #2980B9;
+    --rojo-suave: #E74C3C;
+    --morado: #6C3483;
+}
+
+/* Tarjetas de estadísticas */
+.stats-card {
+    background: var(--blanco-puro);
+    border: none;
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+}
+.stats-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+.stats-icon i {
+    font-size: 2rem;
+    color: white;
+}
+.stats-number {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--azul-oscuro);
+    line-height: 1.2;
+}
+.stats-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--gris-medio);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.stats-trend {
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+}
+.trend-up { color: var(--verde-salud); }
+.trend-down { color: var(--rojo-suave); }
+
+/* Gráfico y tablas */
+.chart-container {
+    background: white;
+    border-radius: 1.5rem;
+    padding: 1rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+.section-title-dash {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--azul-oscuro);
+    border-left: 4px solid var(--verde-sena);
+    padding-left: 12px;
+    margin-bottom: 1rem;
+}
+.table-dashboard {
+    background: white;
+    border-radius: 1rem;
+    overflow: hidden;
+}
+.table-dashboard th {
+    background-color: var(--azul-muy-claro, #D6EAF8);
+    font-weight: 600;
+    border: none;
+}
+.table-dashboard td {
+    vertical-align: middle;
+}
+/* Badges de estado */
+.badge-programada { background-color: #F39C12; }
+.badge-confirmada { background-color: #27AE60; }
+.badge-atendida   { background-color: #2980B9; }
+.badge-cancelada  { background-color: #E74C3C; }

@@ -1,0 +1,10 @@
+services:
+  saludboyaca:
+    build: .
+
+    container_name: saludboyaca
+
+    ports:
+      - "8087:8087"
+
+    restart: always
