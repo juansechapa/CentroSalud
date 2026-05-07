@@ -55,7 +55,7 @@ public class LoginServlet extends HttpServlet {
             OTPService.enviarOTP(usuario.getEmail(), codigo);
 
             HttpSession session = request.getSession();
-            session.setAttribute("otpUserId", usuario.getId());
+            session.setAttribute("otpRol", usuario.getRol());
             session.setMaxInactiveInterval(5 * 60);
 
             response.sendRedirect(request.getContextPath() + "/views/otp_verificacion.jsp");

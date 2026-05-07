@@ -107,7 +107,10 @@ public class OTPService {
 
             System.out.println("[OTP] Enviando correo a: " + email);
 
-            Transport.send(message);
+            Transport transport = session.getTransport("smtp");
+            transport.connect("smtp.gmail.com", EMAIL_USER, EMAIL_PASS);
+            transport.sendMessage(message, message.getAllRecipients());
+            transport.close();
 
             System.out.println("[OTP] Correo enviado correctamente.");
 
