@@ -27,24 +27,11 @@ public class OTPService {
         EMAIL_PASS = System.getenv("EMAIL_PASS");
 
         if (EMAIL_USER == null || EMAIL_PASS == null) {
-            try (InputStream input = OTPService.class.getClassLoader()
-                    .getResourceAsStream("resources/config.properties")) {
-
-                if (input != null) {
-                    Properties prop = new Properties();
-                    prop.load(input);
-
-                    EMAIL_USER = prop.getProperty("email.user");
-                    EMAIL_PASS = prop.getProperty("email.password");
-                }
-
-            } catch (Exception e) {
-                System.err.println("[OTP] Error cargando config: " + e.getMessage());
-            }
+            throw new RuntimeException("EMAIL ENV NO CONFIGURADO EN RENDER");
         }
 
         System.out.println("[OTP INIT] EMAIL_USER = " + EMAIL_USER);
-        System.out.println("[OTP INIT] EMAIL_PASS = " + (EMAIL_PASS != null ? "OK" : "NULL"));
+        System.out.println("[OTP INIT] EMAIL_PASS = OK");
     }
 
     // 🔹 GENERAR OTP
