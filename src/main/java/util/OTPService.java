@@ -67,54 +67,46 @@ public class OTPService {
         return false;
     }
 
-    public static void enviarOTP(String destinatario, String codigo) {
-        if (!validarCredenciales()) {
+    public static void enviarOTP(String email, String codigo) {
+
+        String apiKey = System.getenv("RESEND_API_KEY");
+
+        if (apiKey == null || apiKey.isEmpty()) {
+            System.out.println("[OTP] RESEND_API_KEY no configurada");
             return;
         }
 
+        
         try {
-            Properties props = new Properties();
-            props.put("mail.smtp.auth", "true");
-            props.put("mail.smtp.starttls.enable", "true");
-            props.put("mail.smtp.host", EMAIL_HOST);
-            props.put("mail.smtp.port", EMAIL_PORT);
-            props.put("mail.smtp.connectiontimeout", "10000");
-            props.put("mail.smtp.timeout", "10000");
-            props.put("mail.smtp.writetimeout", "10000");
-            props.put("mail.debug", "true");
+            String json = "{"
+                    + "\"from\":\"Sistema SaludBoyaca <onboarding@resend.dev>\","
+                    + "\"to\":\"" + email + "\","
+                    + "\"subject\":\"Código de verificación\","
+                    + "\"html\":\"<div style='font-family:Arial'>"
+                    + "<h2>Verificación SaludBoyaca</h2>"
+                    + "<p>Tu código es:</p>"
+                    + "<h1 style='letter-spacing:5px'>" + codigo + "</h1>"
+                    + "<p>Expira en 5 minutos</p>"
+                    + "</div>\""
+                    + "}";
 
-            Session session = Session.getInstance(props, new Authenticator() {
-                @Override
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(EMAIL_USER, EMAIL_PASS);
-                }
-            });
+            java.net.URL url = new java.net.URL("https://api.resend.com/emails");
+            java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
 
-            MimeMessage message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(EMAIL_USER, "Sistema SaludBoyaca"));
-            message.setRecipient(Message.RecipientType.TO, new InternetAddress(destinatario));
-            message.setSubject("Código de verificación - SaludBoyaca");
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Authorization", "Bearer " + apiKey);
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setDoOutput(true);
 
-            String html = "<div style='font-family:Arial;padding:20px;border:1px solid #ddd'>"
-                    + "<h2 style='color:#1A5276'>Verificación SaludBoyaca</h2>"
-                    + "<p>Tu código de acceso es:</p>"
-                    + "<h1 style='letter-spacing:5px;background:#f4f4f4;padding:10px'>" + codigo + "</h1>"
-                    + "<p>Válido por 5 minutos.</p>"
-                    + "<hr><small>SaludBoyaca - Centro de Salud</small>"
-                    + "</div>";
-            message.setContent(html, "text/html; charset=utf-8");
+            try (java.io.OutputStream os = conn.getOutputStream()) {
+                os.write(json.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            }
 
-            System.out.println("[OTP] Enviando a: " + destinatario);
-            System.out.println("[OTP] Usando SMTP: " + EMAIL_HOST + ":" + EMAIL_PORT);
+            int responseCode = conn.getResponseCode();
+            System.out.println("[OTP] Resend response: " + responseCode);
 
-            Transport.send(message); // forma más simple y robusta
-
-            System.out.println("[OTP] ✅ Correo enviado exitosamente");
-        } catch (MessagingException e) {
-            System.err.println("[OTP] ❌ Error SMTP:");
-            e.printStackTrace();
         } catch (Exception e) {
-            System.err.println("[OTP] ❌ Error inesperado:");
+            System.err.println("[OTP] Error enviando email con Resend:");
             e.printStackTrace();
         }
     }
