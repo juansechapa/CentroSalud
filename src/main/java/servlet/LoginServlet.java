@@ -55,7 +55,8 @@ public class LoginServlet extends HttpServlet {
             OTPService.enviarOTP(usuario.getEmail(), codigo);
 
             HttpSession session = request.getSession();
-            session.setAttribute("otpRol", usuario.getRol());
+            session.setAttribute("otpUserId", usuario.getId());   // ✅ guarda el ID del usuario
+// Opcional: también puedes guardar el rol si lo necesitas después, pero no es obligatorio
             session.setMaxInactiveInterval(5 * 60);
 
             response.sendRedirect(request.getContextPath() + "/views/otp_verificacion.jsp");
