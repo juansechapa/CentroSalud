@@ -18,7 +18,7 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="section-title mb-0"><fmt:message key="paciente.titulo"/></h2>
                 <div class="d-flex gap-2">
-                    <!-- Botones de exportación -->
+                    <!-- Botones de exportación (visibles para todos) -->
                     <div class="btn-group" role="group">
                         <a href="${pageContext.request.contextPath}/exportar-pacientes?tipo=pdf" class="btn btn-danger" title="<fmt:message key="cita.descargar.pdf"/>">
                             <i class="bi bi-file-pdf"></i> PDF
@@ -82,7 +82,10 @@
                                     <th><fmt:message key="paciente.telefono"/></th>
                                     <th><fmt:message key="paciente.email"/></th>
                                     <th><fmt:message key="paciente.eps"/></th>
-                                    <th><fmt:message key="accion.acciones"/></th>
+                                    <!-- Columna de acciones solo para recepcionista -->
+                                    <c:if test="${sessionScope.rol == 'RECEPCIONISTA'}">
+                                        <th><fmt:message key="accion.acciones"/></th>
+                                    </c:if>
                                 </tr>
                             </thead>
                             <tbody>
@@ -95,20 +98,24 @@
                                         <td>${p.telefono}</td>
                                         <td>${p.email}</td>
                                         <td>${p.eps}</td>
-                                        <td class="text-nowrap">
-                                            <a href="${pageContext.request.contextPath}/PacienteServlet?accion=editar&id=${p.id}" class="btn btn-sm btn-primary" title="<fmt:message key="accion.editar"/>">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" 
-                                                    data-id="${p.id}" data-nombre="${p.nombres} ${p.apellidos}" title="<fmt:message key="accion.eliminar"/>">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </td>
+                                        <c:if test="${sessionScope.rol == 'RECEPCIONISTA'}">
+                                            <td class="text-nowrap">
+                                                <a href="${pageContext.request.contextPath}/PacienteServlet?accion=editar&id=${p.id}" class="btn btn-sm btn-primary" title="<fmt:message key="accion.editar"/>">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" 
+                                                        data-id="${p.id}" data-nombre="${p.nombres} ${p.apellidos}" title="<fmt:message key="accion.eliminar"/>">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </td>
+                                        </c:if>
                                     </tr>
                                 </c:forEach>
                                 <c:if test="${empty listaPacientes}">
                                     <tr>
-                                        <td colspan="8" class="text-center text-muted"><fmt:message key="paciente.lista.vacia"/></td>
+                                        <td colspan="${sessionScope.rol == 'RECEPCIONISTA' ? 8 : 7}" class="text-center text-muted">
+                                            <fmt:message key="paciente.lista.vacia"/>
+                                        </td>
                                     </tr>
                                 </c:if>
                             </tbody>
@@ -118,7 +125,7 @@
             </div>
         </div>
 
-        <!-- Modal de confirmación de eliminación -->
+        <!-- Modal de confirmación de eliminación (solo aparece si el usuario es recepcionista, pero el modal en sí no es necesario ocultarlo) -->
         <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
