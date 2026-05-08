@@ -131,11 +131,17 @@
                                             </span>
                                         </td>
                                         <td>
+                                            <!-- Botón Editar -->
                                             <a href="${pageContext.request.contextPath}/CitaServlet?accion=editar&id=${c.id}" class="btn btn-sm btn-primary" title="<fmt:message key="accion.editar"/>">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
+                                            <!-- Botón Eliminar -->
                                             <a href="${pageContext.request.contextPath}/CitaServlet?accion=eliminar&id=${c.id}" class="btn btn-sm btn-danger" onclick="return confirm('<fmt:message key="cita.confirmar.eliminar"/>')" title="<fmt:message key="accion.eliminar"/>">
                                                 <i class="bi bi-trash"></i>
+                                            </a>
+                                            <!-- Botón PDF Individual -->
+                                            <a href="${pageContext.request.contextPath}/exportar-cita-individual?id=${c.id}" class="btn btn-sm btn-info" title="<fmt:message key="cita.descargar.pdf"/>">
+                                                <i class="bi bi-file-pdf"></i>
                                             </a>
                                         </td>
                                     </tr>

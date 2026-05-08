@@ -85,7 +85,7 @@
                                     <!-- Columna de acciones solo para recepcionista -->
                                     <c:if test="${sessionScope.rol == 'RECEPCIONISTA'}">
                                         <th><fmt:message key="accion.acciones"/></th>
-                                    </c:if>
+                                        </c:if>
                                 </tr>
                             </thead>
                             <tbody>

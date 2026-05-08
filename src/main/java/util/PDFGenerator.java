@@ -1,8 +1,10 @@
 package util;
 
 import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.draw.LineSeparator;
 import dto.Paciente;
 import dto.Cita;
 import dto.Horario;
@@ -195,30 +197,113 @@ public class PDFGenerator {
     public static void generarComprobanteCita(Cita cita, HttpServletResponse response) throws Exception {
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "attachment; filename=cita_" + cita.getId() + ".pdf");
+
         Document document = new Document(PageSize.A4);
-        PdfWriter.getInstance(document, response.getOutputStream());
+        PdfWriter writer = PdfWriter.getInstance(document, response.getOutputStream());
         document.open();
 
-        Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18);
-        Paragraph title = new Paragraph("Comprobante de Cita Médica", titleFont);
-        title.setAlignment(Element.ALIGN_CENTER);
-        document.add(title);
-        document.add(new Paragraph(" "));
+        // Colores institucionales (puedes ajustar los códigos hexadecimales)
+        BaseColor colorAzul = new BaseColor(26, 82, 118);      // #1A5276
+        BaseColor colorVerde = new BaseColor(57, 169, 0);      // #39A900
+        BaseColor colorGrisClaro = new BaseColor(245, 245, 245);
+        BaseColor colorGrisBorde = new BaseColor(200, 200, 200);
 
-        // Información de la cita (con formato)
-        document.add(new Paragraph("ID de cita: " + cita.getId()));
-        document.add(new Paragraph("Paciente: " + cita.getNombrePaciente()));
-        document.add(new Paragraph("Documento: " + cita.getDocumentoPaciente()));
-        document.add(new Paragraph("Médico: " + cita.getNombreMedico()));
-        document.add(new Paragraph("Especialidad: " + cita.getNombreEspecialidad()));
-        document.add(new Paragraph("Fecha: " + cita.getFechaCita().toString()));
-        document.add(new Paragraph("Hora: " + cita.getHoraCita().toString()));
-        document.add(new Paragraph("Motivo: " + (cita.getMotivo() != null ? cita.getMotivo() : "No especificado")));
-        document.add(new Paragraph("Estado: " + cita.getEstado()));
-        document.add(new Paragraph("Observaciones: " + (cita.getObservaciones() != null ? cita.getObservaciones() : "")));
-        document.add(new Paragraph(" "));
-        document.add(new Paragraph("Este comprobante es generado por el sistema de SaludBoyaca."));
+        // Fuentes
+        Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 20, colorAzul);
+        Font subtitleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, colorVerde);
+        Font labelFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 11);
+        Font valueFont = FontFactory.getFont(FontFactory.HELVETICA, 11);
+        Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, BaseColor.WHITE);
+        Font footerFont = FontFactory.getFont(FontFactory.HELVETICA_OBLIQUE, 9, BaseColor.GRAY);
+
+        // --- Cabecera con borde y fondo opcional ---
+        PdfPTable headerTable = new PdfPTable(2);
+        headerTable.setWidthPercentage(100);
+        headerTable.setWidths(new float[]{1, 3});
+        // Celda izquierda: podría ir un logo, aquí pongo un ícono de texto
+        PdfPCell logoCell = new PdfPCell(new Phrase("🏥", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 24, colorAzul)));
+        logoCell.setBorder(Rectangle.NO_BORDER);
+        logoCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        headerTable.addCell(logoCell);
+        // Celda derecha: título principal
+        PdfPCell titleCell = new PdfPCell(new Phrase("SALUDBOYACA", titleFont));
+        titleCell.setBorder(Rectangle.NO_BORDER);
+        titleCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        titleCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        headerTable.addCell(titleCell);
+        document.add(headerTable);
+
+        // Línea decorativa
+        Paragraph separator = new Paragraph();
+        separator.add(new Chunk(new LineSeparator(1, 100, colorVerde, Element.ALIGN_CENTER, -1)));
+        document.add(separator);
+        document.add(Chunk.NEWLINE);
+
+        // Título del comprobante
+        Paragraph comprobanteTitle = new Paragraph("COMPROBANTE DE CITA MÉDICA", subtitleFont);
+        comprobanteTitle.setAlignment(Element.ALIGN_CENTER);
+        document.add(comprobanteTitle);
+        document.add(Chunk.NEWLINE);
+
+        // --- Tabla de datos de la cita (dos columnas) ---
+        PdfPTable dataTable = new PdfPTable(2);
+        dataTable.setWidthPercentage(90);
+        dataTable.setHorizontalAlignment(Element.ALIGN_CENTER);
+        dataTable.setWidths(new float[]{1.5f, 2.5f});
+        dataTable.setSpacingBefore(10f);
+        dataTable.setSpacingAfter(10f);
+        // Estilo de las celdas
+        addLabelValueCell(dataTable, "ID de cita:", String.valueOf(cita.getId()), labelFont, valueFont);
+        addLabelValueCell(dataTable, "Paciente:", cita.getNombrePaciente(), labelFont, valueFont);
+        addLabelValueCell(dataTable, "Documento:", cita.getDocumentoPaciente(), labelFont, valueFont);
+        addLabelValueCell(dataTable, "Médico:", cita.getNombreMedico(), labelFont, valueFont);
+        addLabelValueCell(dataTable, "Especialidad:", cita.getNombreEspecialidad(), labelFont, valueFont);
+        addLabelValueCell(dataTable, "Fecha:", cita.getFechaCita().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), labelFont, valueFont);
+        addLabelValueCell(dataTable, "Hora:", cita.getHoraCita().format(DateTimeFormatter.ofPattern("HH:mm")), labelFont, valueFont);
+        addLabelValueCell(dataTable, "Motivo:", (cita.getMotivo() != null ? cita.getMotivo() : "No especificado"), labelFont, valueFont);
+        addLabelValueCell(dataTable, "Estado:", cita.getEstado(), labelFont, valueFont);
+        addLabelValueCell(dataTable, "Observaciones:", (cita.getObservaciones() != null ? cita.getObservaciones() : ""), labelFont, valueFont);
+
+        document.add(dataTable);
+
+        // --- Tabla de información adicional (por ejemplo, datos de contacto) ---
+        PdfPTable contactInfo = new PdfPTable(1);
+        contactInfo.setWidthPercentage(90);
+        contactInfo.setHorizontalAlignment(Element.ALIGN_CENTER);
+        contactInfo.setSpacingBefore(15f);
+        PdfPCell contactCell = new PdfPCell(new Phrase("Para cualquier cambio o cancelación, comuníquese al 01-8000-123456 o escriba a citas@saludboyaca.com", footerFont));
+        contactCell.setBorder(Rectangle.BOX);
+        contactCell.setPadding(8f);
+        contactCell.setBackgroundColor(colorGrisClaro);
+        contactInfo.addCell(contactCell);
+        document.add(contactInfo);
+
+        // Línea final y pie de página
+        document.add(Chunk.NEWLINE);
+        Paragraph footer = new Paragraph("Documento generado electrónicamente por SaludBoyaca - Sistema de Gestión de Citas", footerFont);
+        footer.setAlignment(Element.ALIGN_CENTER);
+        document.add(footer);
+        document.add(Chunk.NEWLINE);
+        Paragraph fechaActual = new Paragraph("Fecha de emisión: " + java.time.LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")), footerFont);
+        fechaActual.setAlignment(Element.ALIGN_CENTER);
+        document.add(fechaActual);
 
         document.close();
+    }
+
+// Método auxiliar para agregar filas a la tabla de datos
+    private static void addLabelValueCell(PdfPTable table, String label, String value, Font labelFont, Font valueFont) {
+        PdfPCell labelCell = new PdfPCell(new Phrase(label, labelFont));
+        labelCell.setBorder(Rectangle.BOX);
+        labelCell.setBackgroundColor(new BaseColor(240, 248, 255)); // azul muy claro
+        labelCell.setPadding(5f);
+        labelCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        table.addCell(labelCell);
+
+        PdfPCell valueCell = new PdfPCell(new Phrase(value, valueFont));
+        valueCell.setBorder(Rectangle.BOX);
+        valueCell.setPadding(5f);
+        valueCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        table.addCell(valueCell);
     }
 }
