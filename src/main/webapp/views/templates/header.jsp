@@ -21,17 +21,17 @@
                         <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/HorarioServlet?accion=listar"><fmt:message key="nav.horarios"/></a></li>
                         <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/UsuarioServlet?accion=listar"><fmt:message key="nav.empleados"/></a></li>
                         <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/log-auditoria"><fmt:message key="nav.auditoria"/></a></li>
-                    </c:when>
-                    <c:when test="${sessionScope.rol == 'MEDICO'}">
+                        </c:when>
+                        <c:when test="${sessionScope.rol == 'MEDICO'}">
                         <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/dashboard"><fmt:message key="nav.dashboard"/></a></li>
                         <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/CitaServlet?accion=listar"><fmt:message key="nav.mis_citas"/></a></li>
-                    </c:when>
-                    <c:when test="${sessionScope.rol == 'ENFERMERO'}">
+                        </c:when>
+                        <c:when test="${sessionScope.rol == 'ENFERMERO'}">
                         <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/dashboard"><fmt:message key="nav.dashboard"/></a></li>
                         <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/CitaServlet?accion=listar"><fmt:message key="nav.citas"/></a></li>
                         <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/PacienteServlet?accion=listar"><fmt:message key="nav.pacientes"/></a></li>
-                    </c:when>
-                    <c:otherwise>
+                        </c:when>
+                        <c:otherwise>
                         <!-- Usuario no autenticado o rol desconocido: no mostrar enlaces -->
                     </c:otherwise>
                 </c:choose>
@@ -44,6 +44,7 @@
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="?lang=es"><fmt:message key="app.lang.es"/></a></li>
                         <li><a class="dropdown-item" href="?lang=en"><fmt:message key="app.lang.en"/></a></li>
+                        <li><a class="dropdown-item" href="?lang=it"><fmt:message key="app.lang.it"/></a></li>
                     </ul>
                 </div>
                 <c:choose>
