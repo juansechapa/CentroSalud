@@ -16,30 +16,32 @@
                 <c:choose>
                     <c:when test="${sessionScope.rol == 'RECEPCIONISTA'}">
                         <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/dashboard"><fmt:message key="nav.dashboard"/></a></li>
-                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/PacienteServlet?accion=listar"><fmt:message key="nav.pacientes"/></a></li>
-                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/CitaServlet?accion=listar"><fmt:message key="nav.citas"/></a></li>
-                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/HorarioServlet?accion=listar"><fmt:message key="nav.horarios"/></a></li>
-                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/UsuarioServlet?accion=listar"><fmt:message key="nav.empleados"/></a></li>
-                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/log-auditoria"><fmt:message key="nav.auditoria"/></a></li>
+                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/PacienteServlet?accion=listar"><fmt:message key="nav.pazienti"/></a></li>
+                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/CitaServlet?accion=listar"><fmt:message key="nav.appuntamenti"/></a></li>
+                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/HorarioServlet?accion=listar"><fmt:message key="nav.orari"/></a></li>
+                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/UsuarioServlet?accion=listar"><fmt:message key="nav.dipendenti"/></a></li>
+                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/log-auditoria"><fmt:message key="nav.audit"/></a></li>
                         </c:when>
                         <c:when test="${sessionScope.rol == 'MEDICO'}">
                         <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/dashboard"><fmt:message key="nav.dashboard"/></a></li>
-                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/CitaServlet?accion=listar"><fmt:message key="nav.mis_citas"/></a></li>
+                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/CitaServlet?accion=listar"><fmt:message key="nav.miei.appuntamenti"/></a></li>
                         </c:when>
                         <c:when test="${sessionScope.rol == 'ENFERMERO'}">
                         <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/dashboard"><fmt:message key="nav.dashboard"/></a></li>
-                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/CitaServlet?accion=listar"><fmt:message key="nav.citas"/></a></li>
-                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/PacienteServlet?accion=listar"><fmt:message key="nav.pacientes"/></a></li>
+                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/CitaServlet?accion=listar"><fmt:message key="nav.appuntamenti"/></a></li>
+                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/PacienteServlet?accion=listar"><fmt:message key="nav.pazienti"/></a></li>
                         </c:when>
-                        <c:otherwise>
-                        <!-- Usuario no autenticado o rol desconocido: no mostrar enlaces -->
-                    </c:otherwise>
-                </c:choose>
+                    </c:choose>
             </ul>
             <div class="d-flex align-items-center gap-2">
                 <div class="dropdown">
                     <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-globe2"></i> <c:out value="${sessionScope.lang eq 'en' ? 'EN' : 'ES'}"/>
+                        <i class="bi bi-globe2"></i> 
+                        <c:choose>
+                            <c:when test="${sessionScope.lang eq 'en'}">EN</c:when>
+                            <c:when test="${sessionScope.lang eq 'it'}">IT</c:when>
+                            <c:otherwise>ES</c:otherwise>
+                        </c:choose>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="?lang=es"><fmt:message key="app.lang.es"/></a></li>
@@ -54,12 +56,12 @@
                                 <i class="bi bi-person-circle"></i> ${sessionScope.usuario.nombres}
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/logout"><fmt:message key="nav.salir"/></a></li>
+                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/logout"><fmt:message key="nav.esci"/></a></li>
                             </ul>
                         </div>
                     </c:when>
                     <c:otherwise>
-                        <a href="${pageContext.request.contextPath}/views/login.jsp" class="btn btn-outline-light btn-sm"><fmt:message key="nav.acceso"/></a>
+                        <a href="${pageContext.request.contextPath}/views/login.jsp" class="btn btn-outline-light btn-sm"><fmt:message key="nav.accesso"/></a>
                     </c:otherwise>
                 </c:choose>
             </div>

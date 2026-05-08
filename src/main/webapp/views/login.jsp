@@ -41,6 +41,7 @@
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" href="?lang=es"><fmt:message key="app.lang.es"/></a></li>
                                 <li><a class="dropdown-item" href="?lang=en"><fmt:message key="app.lang.en"/></a></li>
+                                <li><a class="dropdown-item" href="?lang=it"><fmt:message key="app.lang.it"/></a></li>
                             </ul>
                         </div>
                         <!-- Botón que abre la modal de login para personal -->
