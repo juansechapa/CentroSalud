@@ -1,13 +1,12 @@
 package util;
 
+import com.resend.Resend;
+import com.resend.core.exception.ResendException;
+import com.resend.services.emails.model.SendEmailRequest;
+import com.resend.services.emails.model.SendEmailResponse;
 import dao.OTPTokenDAO;
 import dao.OTPTokenImpl;
 import dto.OtpToken;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 import java.time.LocalDateTime;
 import java.util.Random;
@@ -17,35 +16,8 @@ public class OTPService {
     private static final int EXPIRACION_MINUTOS = 5;
     private static OTPTokenDAO tokenDAO = new OTPTokenImpl();
 
-    private static final String EMAIL_USER;
-    private static final String EMAIL_PASS;
-    private static final String EMAIL_HOST;
-    private static final String EMAIL_PORT;
-    private static final String BREVO_API_KEY;
-
     static {
-        // Leer variables de entorno
-        EMAIL_USER = System.getenv("EMAIL_USER");
-        EMAIL_PASS = System.getenv("EMAIL_PASS");
-        EMAIL_HOST = System.getenv("EMAIL_HOST");
-        EMAIL_PORT = System.getenv("EMAIL_PORT") != null ? System.getenv("EMAIL_PORT") : "587";
-        BREVO_API_KEY = System.getenv("BREVO_API_KEY");
-
-        // VALIDACIÓN
-        if (EMAIL_USER == null || EMAIL_USER.isBlank()
-                || EMAIL_PASS == null || EMAIL_PASS.isBlank()
-                || EMAIL_HOST == null || EMAIL_HOST.isBlank()
-                || BREVO_API_KEY == null || BREVO_API_KEY.isBlank()) {
-
-            throw new RuntimeException(
-                    "ERROR: Faltan variables de entorno."
-            );
-        }
-
-        System.out.println("[OTP INIT] ✅ Credenciales cargadas");
-        System.out.println("[OTP INIT] ✅ Credenciales cargadas");
-        System.out.println("[OTP INIT] BREVO_API_KEY loaded = "
-                + (BREVO_API_KEY != null && !BREVO_API_KEY.isBlank()));
+        System.out.println("[OTP] Inicializado con Resend API (sin SMTP)");
     }
 
     public static String generarOTP(int idUsuario) {
@@ -73,90 +45,34 @@ public class OTPService {
     }
 
     public static void enviarOTP(String email, String codigo) {
-        if (!validarCredenciales()) {
+        String apiKey = System.getenv("RESEND_API_KEY");
+        if (apiKey == null || apiKey.isBlank()) {
+            System.err.println("[OTP] No se ha configurado RESEND_API_KEY en el entorno.");
             return;
         }
+
+        Resend resend = new Resend(apiKey);
+
+        SendEmailRequest request = SendEmailRequest.builder()
+                .from("onboarding@resend.dev")   // remitente de prueba (funciona sin verificar dominio)
+                .to(email)
+                .subject("Código de verificación - SaludBoyaca")
+                .html("<div style='font-family:Arial;padding:20px;border:1px solid #ddd'>"
+                        + "<h2 style='color:#1A5276'>Verificación SaludBoyaca</h2>"
+                        + "<p>Tu código de acceso es:</p>"
+                        + "<h1 style='letter-spacing:5px;background:#f4f4f4;padding:10px'>" + codigo + "</h1>"
+                        + "<p>Válido por 5 minutos.</p>"
+                        + "<hr><small>SaludBoyaca - Centro de Salud</small>"
+                        + "</div>")
+                .build();
+
         try {
-
-            URL url = new URL("https://api.brevo.com/v3/smtp/email");
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-
-            con.setRequestMethod("POST");
-            con.setRequestProperty("accept", "application/json");
-            con.setRequestProperty("api-key", BREVO_API_KEY);
-            con.setRequestProperty("content-type", "application/json");
-
-            con.setDoOutput(true);
-
-            String jsonInputString
-                    = "{"
-                    + "\"sender\":{"
-                    + "\"name\":\"SaludBoyaca\","
-                    + "\"email\":\"" + EMAIL_USER + "\""
-                    + "},"
-                    + "\"to\":[{"
-                    + "\"email\":\"" + email + "\""
-                    + "}],"
-                    + "\"subject\":\"Código OTP - SaludBoyaca\","
-                    + "\"htmlContent\":\""
-                    + "<div style='font-family:Arial,sans-serif;padding:20px'>"
-                    + "<h2 style='color:#2563eb'>Verificación de acceso</h2>"
-                    + "<p>Tu código OTP es:</p>"
-                    + "<div style='font-size:32px;font-weight:bold;"
-                    + "letter-spacing:5px;color:#111'>"
-                    + codigo
-                    + "</div>"
-                    + "<p>Este código expira en 5 minutos.</p>"
-                    + "<hr>"
-                    + "<small>Sistema SaludBoyaca</small>"
-                    + "</div>"
-                    + "\""
-                    + "}";
-
-            try (OutputStream os = con.getOutputStream()) {
-                byte[] input = jsonInputString.getBytes("utf-8");
-                os.write(input, 0, input.length);
-            }
-
-            int responseCode = con.getResponseCode();
-
-            System.out.println("[OTP] Brevo response: " + responseCode);
-
-            BufferedReader br;
-
-            if (responseCode >= 200 && responseCode < 300) {
-                br = new BufferedReader(
-                        new InputStreamReader(con.getInputStream(), "utf-8"));
-            } else {
-                br = new BufferedReader(
-                        new InputStreamReader(con.getErrorStream(), "utf-8"));
-            }
-
-            StringBuilder response = new StringBuilder();
-            String responseLine;
-
-            while ((responseLine = br.readLine()) != null) {
-                response.append(responseLine.trim());
-            }
-
-            System.out.println("[OTP] RESPONSE BODY: " + response);
-
-        } catch (Exception e) {
+            SendEmailResponse response = resend.emails().send(request);
+            System.out.println("[OTP] Correo enviado correctamente a: " + email);
+            System.out.println("[OTP] ID del mensaje en Resend: " + response.getId());
+        } catch (ResendException e) {
+            System.err.println("[OTP] Error al enviar correo con Resend: " + e.getMessage());
             e.printStackTrace();
         }
-    }
-
-    private static boolean validarCredenciales() {
-
-        if (EMAIL_USER == null || EMAIL_USER.isBlank()
-                || EMAIL_PASS == null || EMAIL_PASS.isBlank()
-                || EMAIL_HOST == null || EMAIL_HOST.isBlank()
-                || BREVO_API_KEY == null || BREVO_API_KEY.isBlank()) {
-
-            System.err.println("[OTP] Credenciales no disponibles.");
-            return false;
-        }
-
-        return true;
     }
 }

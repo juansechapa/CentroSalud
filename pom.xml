@@ -64,8 +64,12 @@
             <version>5.2.5</version>
         </dependency>
         <!-- Apache POI para Excel -->
-       
-        
+        <dependency>
+            <groupId>com.resend</groupId>
+            <artifactId>resend-java</artifactId>
+            <version>2.3.0</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
     
     <build>
