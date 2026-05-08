@@ -3,9 +3,6 @@ package util;
 import dao.OTPTokenDAO;
 import dao.OTPTokenImpl;
 import dto.OtpToken;
-import jakarta.mail.*;
-import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeMessage;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -13,7 +10,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import java.time.LocalDateTime;
-import java.util.Properties;
 import java.util.Random;
 
 public class OTPService {
@@ -28,13 +24,14 @@ public class OTPService {
     private static final String BREVO_API_KEY;
 
     static {
-        // Leer variables de entorno (obligatorias)
+        // Leer variables de entorno
         EMAIL_USER = System.getenv("EMAIL_USER");
         EMAIL_PASS = System.getenv("EMAIL_PASS");
         EMAIL_HOST = System.getenv("EMAIL_HOST");
         EMAIL_PORT = System.getenv("EMAIL_PORT") != null ? System.getenv("EMAIL_PORT") : "587";
         BREVO_API_KEY = System.getenv("BREVO_API_KEY");
 
+        // VALIDACIÓN
         if (EMAIL_USER == null || EMAIL_USER.isBlank()
                 || EMAIL_PASS == null || EMAIL_PASS.isBlank()
                 || EMAIL_HOST == null || EMAIL_HOST.isBlank()
@@ -46,9 +43,9 @@ public class OTPService {
         }
 
         System.out.println("[OTP INIT] ✅ Credenciales cargadas");
-        System.out.println("[OTP INIT] EMAIL_USER = " + EMAIL_USER);
-        System.out.println("[OTP INIT] EMAIL_HOST = " + EMAIL_HOST);
-        System.out.println("[OTP INIT] EMAIL_PORT = " + EMAIL_PORT);
+        System.out.println("[OTP INIT] ✅ Credenciales cargadas");
+        System.out.println("[OTP INIT] BREVO_API_KEY loaded = "
+                + (BREVO_API_KEY != null && !BREVO_API_KEY.isBlank()));
     }
 
     public static String generarOTP(int idUsuario) {
@@ -76,7 +73,9 @@ public class OTPService {
     }
 
     public static void enviarOTP(String email, String codigo) {
-
+        if (!validarCredenciales()) {
+            return;
+        }
         try {
 
             URL url = new URL("https://api.brevo.com/v3/smtp/email");
@@ -148,10 +147,16 @@ public class OTPService {
     }
 
     private static boolean validarCredenciales() {
-        if (EMAIL_USER == null || EMAIL_PASS == null || EMAIL_HOST == null) {
-            System.err.println("[OTP] Credenciales no disponibles. No se enviará correo.");
+
+        if (EMAIL_USER == null || EMAIL_USER.isBlank()
+                || EMAIL_PASS == null || EMAIL_PASS.isBlank()
+                || EMAIL_HOST == null || EMAIL_HOST.isBlank()
+                || BREVO_API_KEY == null || BREVO_API_KEY.isBlank()) {
+
+            System.err.println("[OTP] Credenciales no disponibles.");
             return false;
         }
+
         return true;
     }
 }
