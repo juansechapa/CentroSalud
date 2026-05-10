@@ -13,25 +13,27 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarMain">
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                <c:choose>
-                    <c:when test="${sessionScope.rol == 'RECEPCIONISTA'}">
-                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/dashboard"><fmt:message key="nav.dashboard"/></a></li>
-                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/PacienteServlet?accion=listar"><fmt:message key="nav.pazienti"/></a></li>
-                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/CitaServlet?accion=listar"><fmt:message key="nav.appuntamenti"/></a></li>
-                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/HorarioServlet?accion=listar"><fmt:message key="nav.orari"/></a></li>
-                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/UsuarioServlet?accion=listar"><fmt:message key="nav.dipendenti"/></a></li>
-                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/log-auditoria"><fmt:message key="nav.audit"/></a></li>
-                        </c:when>
-                        <c:when test="${sessionScope.rol == 'MEDICO'}">
-                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/dashboard"><fmt:message key="nav.dashboard"/></a></li>
-                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/CitaServlet?accion=listar"><fmt:message key="nav.miei.appuntamenti"/></a></li>
-                        </c:when>
-                        <c:when test="${sessionScope.rol == 'ENFERMERO'}">
-                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/dashboard"><fmt:message key="nav.dashboard"/></a></li>
-                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/CitaServlet?accion=listar"><fmt:message key="nav.appuntamenti"/></a></li>
-                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/PacienteServlet?accion=listar"><fmt:message key="nav.pazienti"/></a></li>
-                        </c:when>
-                    </c:choose>
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <c:choose>
+                        <c:when test="${sessionScope.rol == 'RECEPCIONISTA'}">
+                            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/dashboard"><fmt:message key="nav.dashboard"/></a></li>
+                            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/PacienteServlet?accion=listar"><fmt:message key="nav.pacientes"/></a></li>
+                            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/CitaServlet?accion=listar"><fmt:message key="nav.citas"/></a></li>
+                            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/HorarioServlet?accion=listar"><fmt:message key="nav.horarios"/></a></li>
+                            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/UsuarioServlet?accion=listar"><fmt:message key="nav.empleados"/></a></li>
+                            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/log-auditoria"><fmt:message key="nav.auditoria"/></a></li>
+                            </c:when>
+                            <c:when test="${sessionScope.rol == 'MEDICO'}">
+                            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/dashboard"><fmt:message key="nav.dashboard"/></a></li>
+                            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/CitaServlet?accion=listar"><fmt:message key="nav.mis_citas"/></a></li>
+                            </c:when>
+                            <c:when test="${sessionScope.rol == 'ENFERMERO'}">
+                            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/dashboard"><fmt:message key="nav.dashboard"/></a></li>
+                            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/CitaServlet?accion=listar"><fmt:message key="nav.citas"/></a></li>
+                            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/PacienteServlet?accion=listar"><fmt:message key="nav.pacientes"/></a></li>
+                            </c:when>
+                        </c:choose>
+                </ul>
             </ul>
             <div class="d-flex align-items-center gap-2">
                 <div class="dropdown">
